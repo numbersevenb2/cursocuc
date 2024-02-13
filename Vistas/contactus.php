@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" />
     <link rel="stylesheet" href="../assets/CSS/foter.css" />
     <link rel="stylesheet" href="../assets/CSS/contactus.css">
-
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 </head>
 <body>
 
@@ -32,7 +32,7 @@
 
     <main>
         <div class="container">
-            <form action="../controlador/clientesController.php" method="get">
+            <form action="../controlador/clientesController.php?opc=1" method="post">
                 <div class="form-group">
                     <label for="txtNombre">Nombre completo</label>
                     <input id="txtNombre" name="txtNombre" class="form-control" type="text">
@@ -52,6 +52,43 @@
                 <button type="submit" class="btn btn-primary">Enviar Comentarios</button>
                 <button type="button" class="btn btn-primary">Regresar</button>
             </form>
+
+            <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Nombre</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Telefono</th>
+                    <th scope="col">Comentario</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                    <?php
+                        require_once("../modelos/Conexion.php");
+                        require_once("../modelos/clientesModelos.php");
+                        $clientes = new clientesModelos();
+                        $getComments = $clientes->select();
+                        if($getComments){
+                            while($fila = $getComments->fetch_assoc()){
+                                echo "<tr>";
+                                    echo "<th scope='row'>1</th";
+                                    echo "<td>".$fila["nombre"].'</td>';
+                                    echo "<td>".$fila["email"].'</td>';
+                                    echo "<td>".$fila["telefono"].'</td>';
+                                    echo "<td>".$fila["comentario"].'</td>';
+                                    echo "<td>
+                                    <button type='submit' class='btn btn-primary' onClick='actualizar(\"".$fila['nombre']."\")' >Actualizar</button>
+                                    <button type='button' class='btn btn-primary' onClick='eliminar()' >Eliminar</button>
+                                    </td>";
+                                echo "</tr>";
+                            }
+                        }    
+                    ?>
+                </tbody>
+              </table>
+
         </div>
 
     </main>
@@ -255,3 +292,13 @@
 
 </body>
 </html>
+<script>
+    //document.getElementById("txtNombre").value = "Hola :)"
+    function actualizar(nombre){
+        alert('nombre');
+    }   
+    
+    function eliminar(){
+
+    }
+</script>
