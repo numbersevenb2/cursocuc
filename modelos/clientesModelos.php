@@ -18,7 +18,7 @@
         function update($idComentario, $nombre, $email, $telefono, $comentario){
             $conexion = new Conexion();
             $mysqli = $conexion->crearConexion();
-            $sql = "UPDATE coments SET nombre = '".$nombre."', email = '".$email."' 
+            $sql = "UPDATE coments SET nombre = '".$nombre."', email = '".$email."', 
             telefono = '".$telefono."', comentario = '".$comentario."' 
             WHERE idComentario = ".$idComentario;
             if($mysqli->query($sql) == TRUE){

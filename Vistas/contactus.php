@@ -31,8 +31,11 @@
       </nav>
 
     <main>
+        <div id="alert" class="alert alert-default" role="alert">
+        </div>
         <div class="container">
-            <form action="../controlador/clientesController.php?opc=1" method="post">
+            <form id= "frmContacto">
+                <input type="hidden" name="hddIdComentario" id="hddIdComentario"/>
                 <div class="form-group">
                     <label for="txtNombre">Nombre completo</label>
                     <input id="txtNombre" name="txtNombre" class="form-control" type="text">
@@ -49,8 +52,9 @@
                     <label for="txtComentarios">Comentarios</label>
                     <textarea name="txtComentarios" id="txtComentarios" cols="30" rows="10" class="form-control"></textarea>
                 </div>
-                <button type="submit" class="btn btn-primary">Enviar Comentarios</button>
-                <button type="button" class="btn btn-primary">Regresar</button>
+                <button type="button" id="btnInsertar" class="btn btn-primary">Enviar Comentarios</button>
+                <button type="button" id="btnActualizar" class="btn btn-success">Actualizar Comentarios</button>
+                <button type="button" class="btn btn-danger">Regresar</button>
             </form>
 
             <table class="table table-striped">
@@ -61,31 +65,12 @@
                     <th scope="col">Email</th>
                     <th scope="col">Telefono</th>
                     <th scope="col">Comentario</th>
+                    <th scope="col"></th>
                     <th></th>
                   </tr>
                 </thead>
-                <tbody>
-                    <?php
-                        require_once("../modelos/Conexion.php");
-                        require_once("../modelos/clientesModelos.php");
-                        $clientes = new clientesModelos();
-                        $getComments = $clientes->select();
-                        if($getComments){
-                            while($fila = $getComments->fetch_assoc()){
-                                echo "<tr>";
-                                    echo "<th scope='row'>1</th";
-                                    echo "<td>".$fila["nombre"].'</td>';
-                                    echo "<td>".$fila["email"].'</td>';
-                                    echo "<td>".$fila["telefono"].'</td>';
-                                    echo "<td>".$fila["comentario"].'</td>';
-                                    echo "<td>
-                                    <button type='submit' class='btn btn-primary' onClick='actualizar(\"".$fila['nombre']."\")' >Actualizar</button>
-                                    <button type='button' class='btn btn-primary' onClick='eliminar()' >Eliminar</button>
-                                    </td>";
-                                echo "</tr>";
-                            }
-                        }    
-                    ?>
+                <tbody id="tblComentario">
+                    
                 </tbody>
               </table>
 
@@ -292,13 +277,101 @@
 
 </body>
 </html>
+
 <script>
     //document.getElementById("txtNombre").value = "Hola :)"
-    function actualizar(nombre){
-        alert('nombre');
+    function actualizar(idComentario, nombre, email, telefono, comentario){
+        //document.getElementById("txtNombre").value = nombre;
+        //document.getElementById("txtEmail").value = email;
+        //document.getElementById("txtTelefono").value = telefono;
+        //document.getElementById("txtComentarios").value = comentario;
+
+        $('#btnActualizar').show();
+        $('#btnInsertar').hide();
+        $('#hddIdComentario').prop("value",idComentario);
+        $('#txtNombre').prop("value",nombre);
+        $('#txtEmail').prop("value",email);
+        $('#txtTelefono').prop("value",telefono);
+        $('#txtComentarios').prop("value",comentario);
     }   
     
-    function eliminar(){
-
+    function eliminar(idComentario){
+        if(confirm("Deseas eliminar el comentario seleccionado?")){
+            $.ajax({
+                        type: "POST",
+                        data: {"idComentario" : idComentario},
+                        url: "../controlador/clientesController.php?opc=3",
+                        success: function(data){
+                        $('#alert').show();
+                        $('#alert').text(data);
+                        if(data == "Registro Eliminado" ){
+                            $('#alert').addClass("alert-success");
+                        }else{
+                            $('#alert').addClass("alert-danger");
+                        }
+                        }
+                    });
+        }
     }
+
+    function getComments(){
+        $.ajax({ 
+            type: "POST",
+            url: "../controlador/clientesController.php?opc=4",
+            success: function(data){
+                $("#tblComentario").html(data);
+            }
+        }); 
+    }
+
+    $(document).ready(function(){
+        $('#btnActualizar').hide();
+        $('#alert').hide();
+        getComments();
+
+        $('#btnInsertar').click(
+            function(){
+                var formData = $('#frmContacto').serialize();
+                $.ajax({ 
+                    type: "POST",
+                    data: formData,
+                    url: "../controlador/clientesController.php?opc=1",
+                    success: function(data){
+                        $('#alert').show();
+                        $('#alert').text(data);
+                        alert("-"+data+"-");
+                        if(data == "Registro Insertado" ){
+                            $('#alert').addClass("alert-success");
+                            getComments();
+                        }else{
+                            $('#alert').addClass("alert-danger");
+                        }
+                    }
+                });  
+            }
+        );
+
+        $('#btnActualizar').click(
+            function(){
+                var formData = $('#frmContacto').serialize();
+                $.ajax({ 
+                    type: "POST",
+                    data: formData,
+                    url: "../controlador/clientesController.php?opc=2",
+                    success: function(data){
+                        $('#alert').show();
+                        $('#alert').text(data);
+                        alert("-"+data+"-");
+                        if(data == "Se actualizo correctamente el registro" ){
+                            $('#alert').addClass("alert-success");
+                            getComments();
+                        }else{
+                            $('#alert').addClass("alert-danger");
+                        }
+                    }
+                });  
+            }
+        );
+
+    });
 </script>
