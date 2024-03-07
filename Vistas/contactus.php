@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" />
     <link rel="stylesheet" href="../assets/CSS/foter.css" />
     <link rel="stylesheet" href="../assets/CSS/contactus.css">
-
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 </head>
 <body>
 
@@ -31,8 +31,11 @@
       </nav>
 
     <main>
+        <div id="alert" class="alert alert-default" role="alert">
+        </div>
         <div class="container">
-            <form action="../controlador/clientesController.php" method="get">
+            <form id= "frmContacto">
+                <input type="hidden" name="hddIdComentario" id="hddIdComentario"/>
                 <div class="form-group">
                     <label for="txtNombre">Nombre completo</label>
                     <input id="txtNombre" name="txtNombre" class="form-control" type="text">
@@ -49,9 +52,28 @@
                     <label for="txtComentarios">Comentarios</label>
                     <textarea name="txtComentarios" id="txtComentarios" cols="30" rows="10" class="form-control"></textarea>
                 </div>
-                <button type="submit" class="btn btn-primary">Enviar Comentarios</button>
-                <button type="button" class="btn btn-primary">Regresar</button>
+                <button type="button" id="btnInsertar" class="btn btn-primary">Enviar Comentarios</button>
+                <button type="button" id="btnActualizar" class="btn btn-success">Actualizar Comentarios</button>
+                <button type="button" class="btn btn-danger">Regresar</button>
             </form>
+
+            <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Nombre</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Telefono</th>
+                    <th scope="col">Comentario</th>
+                    <th scope="col"></th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="tblComentario">
+                    
+                </tbody>
+              </table>
+
         </div>
 
     </main>
@@ -255,3 +277,101 @@
 
 </body>
 </html>
+
+<script>
+    //document.getElementById("txtNombre").value = "Hola :)"
+    function actualizar(idComentario, nombre, email, telefono, comentario){
+        //document.getElementById("txtNombre").value = nombre;
+        //document.getElementById("txtEmail").value = email;
+        //document.getElementById("txtTelefono").value = telefono;
+        //document.getElementById("txtComentarios").value = comentario;
+
+        $('#btnActualizar').show();
+        $('#btnInsertar').hide();
+        $('#hddIdComentario').prop("value",idComentario);
+        $('#txtNombre').prop("value",nombre);
+        $('#txtEmail').prop("value",email);
+        $('#txtTelefono').prop("value",telefono);
+        $('#txtComentarios').prop("value",comentario);
+    }   
+    
+    function eliminar(idComentario){
+        if(confirm("Deseas eliminar el comentario seleccionado?")){
+            $.ajax({
+                        type: "POST",
+                        data: {"idComentario" : idComentario},
+                        url: "../controlador/clientesController.php?opc=3",
+                        success: function(data){
+                        $('#alert').show();
+                        $('#alert').text(data);
+                        if(data == "Registro Eliminado" ){
+                            $('#alert').addClass("alert-success");
+                        }else{
+                            $('#alert').addClass("alert-danger");
+                        }
+                        }
+                    });
+        }
+    }
+
+    function getComments(){
+        $.ajax({ 
+            type: "POST",
+            url: "../controlador/clientesController.php?opc=4",
+            success: function(data){
+                $("#tblComentario").html(data);
+            }
+        }); 
+    }
+
+    $(document).ready(function(){
+        $('#btnActualizar').hide();
+        $('#alert').hide();
+        getComments();
+
+        $('#btnInsertar').click(
+            function(){
+                var formData = $('#frmContacto').serialize();
+                $.ajax({ 
+                    type: "POST",
+                    data: formData,
+                    url: "../controlador/clientesController.php?opc=1",
+                    success: function(data){
+                        $('#alert').show();
+                        $('#alert').text(data);
+                        alert("-"+data+"-");
+                        if(data == "Registro Insertado" ){
+                            $('#alert').addClass("alert-success");
+                            getComments();
+                        }else{
+                            $('#alert').addClass("alert-danger");
+                        }
+                    }
+                });  
+            }
+        );
+
+        $('#btnActualizar').click(
+            function(){
+                var formData = $('#frmContacto').serialize();
+                $.ajax({ 
+                    type: "POST",
+                    data: formData,
+                    url: "../controlador/clientesController.php?opc=2",
+                    success: function(data){
+                        $('#alert').show();
+                        $('#alert').text(data);
+                        alert("-"+data+"-");
+                        if(data == "Se actualizo correctamente el registro" ){
+                            $('#alert').addClass("alert-success");
+                            getComments();
+                        }else{
+                            $('#alert').addClass("alert-danger");
+                        }
+                    }
+                });  
+            }
+        );
+
+    });
+</script>
